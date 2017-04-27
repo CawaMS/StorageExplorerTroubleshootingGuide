@@ -26,6 +26,7 @@ ms.author:
 This guide summarizes solutions for common issues seen in Storage Explorer.
 
 * [Sign in Issues]
+    * [Self-Signed Certificate in Certificate Chain]
     * [Unable to retrieve subscriptions]
     * [Unable to see the authentication page]
     * [Cannot remove account]
@@ -39,6 +40,26 @@ This guide summarizes solutions for common issues seen in Storage Explorer.
 
 ## <a name="sign-in-issues"></a>Sign in Issues
 Before proceeding further, try restarting your application and see if the problems can be fixed.
+
+### <a name="self-signed-certificate-in-certificate-chain"></a>Self-Signed Certificate in Certificate Chain
+There a few reasons you may be seeing this error, the two most common ones are:
+1.	You are behind a “transparent proxy”, which means someone (such as your IT department) is intercepting HTTPS traffic, decrypting it, and then encrypting it using a self-signed certificate
+2.	You are running software, such as anti-virus software, which is injecting a self-signed SSL certificates into the HTTPS messages you receive
+
+When Storage Explorer encounters one of these "self-signed certificates", it can no longer know if the HTTPS message it is receiving has been tampered with. If you have a copy of the self-signed certificate though, then you can tell Storage Explorer to trust it. If you are unsure of who is injecting the certificate, then you can try to find it yourself by doing the following:
+
+1.	Install Open SSL
+    * [Windows](https://slproweb.com/products/Win32OpenSSL.html) (any of the light versions should suffice)
+    * Mac and Linux: Should be included with your operating system
+2. Run Open SSL
+    * Windows: Go to the install directory, then /bin/, then double click on openssl.exe
+    * Mac and Linux: execute "openssl" from a terminal
+3.	Execute `s_client -showcerts -connect microsoft.com:443`
+4.	Look for self-signed certificates. If you're unsure which are self-signed, then look for any where the subject ("s:") and issuer ("i:") are the same. 
+5.	Once you have found any self-signed certificates, then for each one, copy and paste everything from and including `-----BEGIN CERTIFICATE-----` to `-----END CERTIFICATE-----` to a new .cer file.
+6.	Open Storage Explorer and then go to Edit -> SSL Certificates -> Import Certificates. Using the file picker, find, select, and open the .cer files you created.
+
+If you are unable to find any self-signed certificates using the above steps, then reach out to us via the feedback tool for more help.
 
 ### <a name="unable-to-retrieve-subscriptions"></a>Unable to retrieve subscriptions
 If you are unable to retrieve your subscriptions after you successfully signed in:
@@ -118,6 +139,7 @@ If none of the solutions work for you, submit your issue via the feedback tool w
 
 <!--Anchors-->
 [Sign in Issues]: #sign-in-issues
+[Self-Signed Certificate in Certificate Chain]: #self-signed-certificate-in-certificate-chain
 [Unable to retrieve subscriptions]: #unable-to-retrieve-subscriptions
 [Unable to see the authentication page]:#unable-to-see-auth-page
 [Cannot remove account]: #unable-to-remove-account
